@@ -247,6 +247,42 @@ public class GoFoodApp {
         // Sorting sederhana: dahulukan yang promo
         List<Restoran> restoPromo = new ArrayList<>();
         List<Restoran> restoBiasa = new ArrayList<>();
+        
+        // Tambahan informasi rekomendasi
+System.out.println("\n===== Rekomendasi Restoran Hari Ini =====");
+
+List<Restoran> restoranPromo = new ArrayList<>();
+List<Restoran> restoranTanpaPromo = new ArrayList<>();
+
+for (Restoran r : daftarRestoran) {
+    if (r.getPromoDeskripsi() != null && !r.getPromoDeskripsi().isEmpty()) {
+        restoranPromo.add(r);
+    } else {
+        restoranTanpaPromo.add(r);
+    }
+}
+
+restoranTanpaPromo.sort(Comparator.comparingDouble(Restoran::getRataRataHargaMenu));
+
+// Tampilkan restoran dengan promo
+if (!restoranPromo.isEmpty()) {
+    System.out.println("== Sedang Ada Promo ==");
+    int nomor = 1;
+    for (Restoran r : restoranPromo) {
+        System.out.printf("%d. %s (%s)\n", nomor++, r.getNama(), r.getPromoDeskripsi());
+    }
+}
+
+// Tampilkan restoran tanpa promo dengan harga termurah
+if (!restoranTanpaPromo.isEmpty()) {
+    System.out.println("\n== Resto dengan Harga Menu Terworth it ==");
+    int nomor = 1;
+    for (Restoran r : restoranTanpaPromo) {
+        System.out.printf("%d. %s - Rata-rata Rp %,.0f\n", nomor++, r.getNama(), r.getRataRataHargaMenu());
+    }
+}
+System.out.println("============================================\n");
+        
         for (Restoran r : this.daftarRestoran) {
             if (r.isAdaPromo()) {
                 restoPromo.add(r);
