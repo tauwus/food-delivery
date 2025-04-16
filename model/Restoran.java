@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class Restoran implements Showable {
-
+    
     protected String nama;
     protected int jarak;
     protected Map<String, Double> daftarMenu;
