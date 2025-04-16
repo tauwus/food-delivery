@@ -47,6 +47,15 @@ public abstract class Restoran implements Showable {
         return this.daftarMenu.get(namaMenu);
     }
 
+    public double getRataRataHargaMenu() {
+        if (daftarMenu == null || daftarMenu.isEmpty()) return 0;
+        double total = 0;
+        for (double harga : daftarMenu.values()) {
+            total += harga;
+        }
+        return total / daftarMenu.size();
+    }    
+
     public void tampilkanSemuaMenu() {
         System.out.println("\n--- Menu " + this.nama + " ---");
         int i = 1;
@@ -56,8 +65,13 @@ public abstract class Restoran implements Showable {
         System.out.println("----------------------");
     }
 
-    public abstract String getTipeRestoran();
+    public void tampilkanDetailDenganHargaRataRata() {
+        System.out.printf("%s (%s) [%s] - Rata-rata harga: Rp %,.0f %s\n",
+                nama, getTipeRestoran(), getRataRataHargaMenu(), (adaPromo ? "[PROMO!]" : ""));
+    }   
 
+    public abstract String getTipeRestoran();
+    
     @Override
     public void tampilkanDetail() {
         System.out.printf("%s (%s) - Jarak: %d km %s\n",
