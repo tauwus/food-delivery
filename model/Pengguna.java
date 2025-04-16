@@ -83,51 +83,63 @@ public class Pengguna implements Showable {
                     case 1:
                         System.out.print("Masukkan Username baru: ");
                         String newUsername = scan.nextLine().trim();
-                        if (!newUsername.isEmpty() && !newUsername.equals(this.getUsername())) {
-                            username = newUsername;
-                            System.out.println("(+) Username berhasil diperbarui.");
-                            tampilkanDetail();
+                        
+                        // Validasi Username
+                        if (newUsername.isEmpty()) {
+                            System.out.println("(!) Username tidak boleh kosong.");
+                            System.out.println("Kembali ke menu update profil...");
+                        } else if (newUsername.length() > 20) {
+                            System.out.println("(!) Username terlalu panjang. Maksimal 20 karakter.");
+                            System.out.println("Kembali ke menu update profil...");
                         } else if (newUsername.equals(this.getUsername())) {
                             System.out.println("(-) Username sama, tidak ada perubahan.");
                             System.out.println("Kembali ke menu update profil...");
                         } else {
-                            System.out.println("(!) Username tidak boleh kosong.");
-                            System.out.println("Kembali ke menu update profil...");
+                            username = newUsername;
+                            System.out.println("(+) Username berhasil diperbarui.");
+                            tampilkanDetail();
                         }
                         break;
+                        
                     case 2:
                         System.out.print("Masukkan No. HP baru: ");
                         String newNomorHp = scan.nextLine().trim();
-                        if (!newNomorHp.isEmpty() && newNomorHp.matches("\\d+") && !newNomorHp.equals(this.getNomorHp())) {
-                            nomorHp = newNomorHp;
-                            System.out.println("(+) Nomor HP berhasil diperbarui.");
-                            tampilkanDetail();
+                        
+                        // Validasi Nomor Handphone
+                        if (newNomorHp.isEmpty()) {
+                            System.out.println("(!) Nomor HP tidak boleh kosong.");
+                            System.out.println("Kembali ke menu update profil...");
+                        } else if (!newNomorHp.matches("^08\\d{8,12}$")) {
+                            System.out.println("(!) Format Nomor HP tidak valid.");
+                            System.out.println("Pastikan nomor diawali 08 dan panjangnya 10-14 digit.");
+                            System.out.println("Kembali ke menu update profil...");
                         } else if (newNomorHp.equals(this.getNomorHp())) {
                             System.out.println("(-) Nomor HP sama, tidak ada perubahan.");
                             System.out.println("Kembali ke menu update profil...");
-                        } else if (newNomorHp.isEmpty()) {
-                            System.out.println("(!) Nomor HP tidak boleh kosong.");
-                            System.out.println("Kembali ke menu update profil...");
                         } else {
-                            System.out.println("(!) Format Nomor HP tidak valid (hanya angka).");
-                            System.out.println("Kembali ke menu update profil...");
+                            nomorHp = newNomorHp;
+                            System.out.println("(+) Nomor HP berhasil diperbarui.");
+                            tampilkanDetail();
                         }
                         break;
+                
                     case 3:
                         System.out.print("Masukkan Alamat baru: ");
                         String newAlamat = scan.nextLine().trim();
-                        if (!newAlamat.isEmpty() && !newAlamat.equals(this.getAlamat())) {
-                            alamat = newAlamat;
-                            System.out.println("(+) Alamat berhasil diperbarui.");
-                            tampilkanDetail();
+                        
+                        if (newAlamat.isEmpty()) {
+                            System.out.println("(!) Alamat tidak boleh kosong.");
+                            System.out.println("Kembali ke menu update profil...");
                         } else if (newAlamat.equals(this.getAlamat())) {
                             System.out.println("(-) Alamat sama, tidak ada perubahan.");
                             System.out.println("Kembali ke menu update profil...");
                         } else {
-                            System.out.println("(!) Alamat tidak boleh kosong.");
-                            System.out.println("Kembali ke menu update profil...");
+                            alamat = newAlamat;
+                            System.out.println("(+) Alamat berhasil diperbarui.");
+                            tampilkanDetail();
                         }
                         break;
+                                        
                     case 0:
                         lanjutUpdate = false;
                         System.out.println("Selesai memperbarui profil.");
