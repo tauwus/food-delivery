@@ -1,7 +1,8 @@
 package model;
 
-import enums.JenisPengantaran;
 import interfaces.Showable;
+import enums.JenisPengantaran;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,10 @@ public class Pesanan implements Showable {
     private JenisPengantaran jenisPengantaran;
     private double biayaPengantaran;
     private double totalHargaMakanan;
+    private double diskonPromo;
     private double totalAkhir;
+
+    private static final double NILAI_DISKON_PROMO = 5000.0;
 
     public Pesanan(Pengguna pengguna, Restoran restoran) {
         this.idPesanan = ++counterPesanan;
@@ -24,7 +28,9 @@ public class Pesanan implements Showable {
         this.items = new ArrayList<>();
         this.totalHargaMakanan = 0;
         this.biayaPengantaran = 0;
+        this.diskonPromo = 0;
         this.totalAkhir = 0;
+        this.jenisPengantaran = null;
     }
 
     public int getIdPesanan() {
@@ -39,6 +45,10 @@ public class Pesanan implements Showable {
         return totalAkhir;
     }
 
+    public double getDiskonPromo() {
+        return diskonPromo;
+    }
+
     public double getBiayaPengantaran() {
         return biayaPengantaran;
     }
@@ -49,6 +59,7 @@ public class Pesanan implements Showable {
 
     public void setBiayaPengantaran(double biayaPengantaran) {
         this.biayaPengantaran = biayaPengantaran;
+        this.hitungTotalAkhir();
     }
 
     public void tambahItem(String namaMenu, double hargaSatuan, int jumlah) {
@@ -60,17 +71,17 @@ public class Pesanan implements Showable {
                     if (item.getNamaMenu().equals(namaMenu)) {
                         items.set(i, new ItemPesanan(namaMenu, hargaSatuan, item.getJumlah() + jumlah));
                         found = true;
-                        System.out.println(">> Jumlah '" + namaMenu + "' diperbarui di keranjang.");
+                        System.out.println(">> Jumlah '" + namaMenu + "' diperbarui.");
                         break;
                     }
                 }
                 if (!found) {
                     this.items.add(new ItemPesanan(namaMenu, hargaSatuan, jumlah));
-                    System.out.println(">> " + jumlah + "x " + namaMenu + " ditambahkan ke keranjang.");
+                    System.out.println(">> " + jumlah + "x " + namaMenu + " ditambahkan.");
                 }
                 hitungTotalMakanan();
             } else {
-                System.out.println("Jumlah harus lebih dari 0.");
+                System.out.println("(!) Jumlah harus > 0.");
             }
         } else {
             System.err.println("Error internal: Menu '" + namaMenu + "' tidak valid.");
@@ -86,7 +97,18 @@ public class Pesanan implements Showable {
     }
 
     public void hitungTotalAkhir() {
-        this.totalAkhir = this.totalHargaMakanan + this.biayaPengantaran;
+        this.diskonPromo = 0;
+        if (this.restoran != null && this.restoran.isAdaPromo() && this.totalHargaMakanan > 0) {
+            this.diskonPromo = NILAI_DISKON_PROMO;
+            if (this.diskonPromo > this.totalHargaMakanan) {
+                this.diskonPromo = this.totalHargaMakanan;
+            }
+        }
+        double totalSebelumDiskon = this.totalHargaMakanan + this.biayaPengantaran;
+        this.totalAkhir = totalSebelumDiskon - this.diskonPromo;
+        if (this.totalAkhir < 0) {
+            this.totalAkhir = 0;
+        }
     }
 
     public boolean isSaldoCukup() {
@@ -96,7 +118,7 @@ public class Pesanan implements Showable {
     @Override
     public void tampilkanDetail() {
         System.out.println("\n--- Detail Pesanan #" + idPesanan + " ---");
-        System.out.println("Restoran       : " + restoran.getNama());
+        System.out.println("Restoran       : " + restoran.getNama() + (restoran.isAdaPromo() ? " [PROMO AKTIF!]" : ""));
         System.out.println("Alamat Antar   : " + pengguna.getAlamat());
         System.out.println("Item Dipesan   :");
         if (items.isEmpty()) {
@@ -109,18 +131,24 @@ public class Pesanan implements Showable {
         System.out.println("------------------------------");
         System.out.printf("Subtotal Makanan : Rp %,.0f\n", totalHargaMakanan);
         if (jenisPengantaran != null) {
-            System.out.printf("Ongkos Kirim (%s): Rp %,.0f\n", jenisPengantaran.getNama(), biayaPengantaran);
+            System.out.printf("Ongkos Kirim (%s): Rp %,.0f\n", jenisPengantaran.getNama(), biayaPengantaran); // <<< Pakai getNama() dari Enum
         } else {
             System.out.println("Ongkos Kirim     : (Belum dipilih)");
         }
+        if (this.diskonPromo > 0) {
+            System.out.printf("Diskon Promo     : Rp -%,.0f\n", this.diskonPromo);
+        }
+        System.out.println("------------------------------");
         System.out.printf("Total Pembayaran : Rp %,.0f\n", totalAkhir);
         System.out.println("==============================");
     }
 
     public void tampilkanRingkasanRiwayat() {
-        System.out.printf("ID: #%d | Resto: %-20s | Total: Rp %,.0f\n",
+        System.out.printf("ID: #%d | Resto: %-20s | Total: Rp %,.0f %s\n",
                 idPesanan,
                 restoran.getNama(),
-                totalAkhir);
+                totalAkhir,
+                (diskonPromo > 0 ? "(Promo)" : "")
+        );
     }
 }
