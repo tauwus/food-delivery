@@ -2,12 +2,12 @@ package model;
 
 public class TokoDessert extends Restoran {
 
-    public TokoDessert(String nama, int jarak, boolean adaPromo, String kategoriHarga) {
-        super(nama, jarak, adaPromo, kategoriHarga);
-        inisialisasiMenuDefault(nama);
+    public TokoDessert(String nama) {
+        super(nama);
+        daftarMenu(nama);
     }
 
-    private void inisialisasiMenuDefault(String namaToko) {
+    private void daftarMenu(String namaToko) {
         if (namaToko.equalsIgnoreCase("Mixue")) {
             tambahMenu("Boba Sundae", 16000);
             tambahMenu("Mi-Shake Strawberry", 16000);

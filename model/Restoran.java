@@ -3,6 +3,7 @@ package model;
 import interfaces.Showable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 
 public abstract class Restoran implements Showable {
 
@@ -10,14 +11,14 @@ public abstract class Restoran implements Showable {
     protected int jarak;
     protected Map<String, Double> daftarMenu;
     protected boolean adaPromo;
-    protected String kategoriHarga;
 
-    public Restoran(String nama, int jarak, boolean adaPromo, String kategoriHarga) {
+    private final Random r = new Random();
+
+    public Restoran(String nama) {
         this.nama = nama;
-        this.jarak = jarak;
-        this.adaPromo = adaPromo;
-        this.kategoriHarga = kategoriHarga;
         this.daftarMenu = new LinkedHashMap<>();
+        this.jarak = r.nextInt(5) + 1;
+        this.adaPromo = r.nextDouble() < 0.4;
     }
 
     public String getNama() {
@@ -34,10 +35,6 @@ public abstract class Restoran implements Showable {
 
     public boolean isAdaPromo() {
         return adaPromo;
-    }
-
-    public String getKategoriHarga() {
-        return kategoriHarga;
     }
 
     protected void tambahMenu(String namaMenu, double harga) {
@@ -63,12 +60,12 @@ public abstract class Restoran implements Showable {
 
     @Override
     public void tampilkanDetail() {
-        System.out.printf("%s (%s) [%s] - Jarak: %d km %s\n",
-                nama, getTipeRestoran(), kategoriHarga, jarak, (adaPromo ? "[PROMO!]" : ""));
+        System.out.printf("%s (%s) - Jarak: %d km %s\n",
+                nama, getTipeRestoran(), jarak, (adaPromo ? "[PROMO!]" : ""));
     }
 
     public void tampilkanDetail(int nomor) {
-        System.out.printf("%d. %s (%s) [%s] - Jarak: %d km %s\n",
-                nomor, nama, getTipeRestoran(), kategoriHarga, jarak, (adaPromo ? "[PROMO!]" : ""));
+        System.out.printf("%d. %s (%s) - Jarak: %d km %s\n",
+                nomor, nama, getTipeRestoran(), jarak, (adaPromo ? "[PROMO!]" : ""));
     }
 }

@@ -26,13 +26,11 @@ public class Pengantaran {
                 if (jam >= 12 && jam < 18) {
                     biayaFinalPerKm = biayaDasar + 200;
                 }
-
                 break;
             case EKONOMIS:
                 if (jam < 6 || jam >= 22) {
                     return -1;
                 }
-
                 if (jam >= 18 && jam < 22) {
                     biayaFinalPerKm = biayaDasar + 300;
                 } else if (jam >= 12 && jam < 18) {

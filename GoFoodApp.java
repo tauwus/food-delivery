@@ -3,75 +3,71 @@ import exceptions.HandlerInputTidakValid;
 import enums.JenisPengantaran;
 import model.*;
 import service.*;
-import java.util.*;
+
+import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.InputMismatchException;
 
 public class GoFoodApp {
 
-    // Variabel instance untuk menyimpan state aplikasi
-    private Scanner scan;
-    private Pengguna pengguna;
-    private List<Restoran> daftarRestoran;
-    private List<Pesanan> riwayatPesanan;
-    private Waktu waktuAplikasi;
-
-    public GoFoodApp() {
-        scan = new Scanner(System.in);
-        daftarRestoran = new ArrayList<>();
-        riwayatPesanan = new ArrayList<>();
-        waktuAplikasi = new Waktu(); // Objek waktu dibuat dan thread jam dimulai
-        inisialisasiDataRestoran(); // Isi daftar restoran
-    }
+    static Scanner scan;
+    static Pengguna pengguna;
+    static Restoran[] daftarRestoran = {
+        new RestoranCepatSaji("McDonald's"),
+        new RestoranCepatSaji("Burger King"),
+        new RestoranCepatSaji("KFC"),
+        new RestoranCepatSaji("Gacoan"),
+        new TokoDessert("Mixue"),
+        new TokoDessert("Retawu Deli"),
+        new TokoDessert("Beli Kopi")
+    };
+    static List<Pesanan> riwayatPesanan;
+    static Waktu waktuAplikasi;
 
     public static void main(String[] args) {
-        GoFoodApp app = new GoFoodApp();
-        app.run();
-    }
+        scan = new Scanner(System.in);
+        riwayatPesanan = new ArrayList<>();
+        pengguna = null;
+        waktuAplikasi = new Waktu();
 
-    public void run() {
-        System.out.println("\n+---------------------------------+");
-        System.out.println("|   Selamat Datang di GoFood!   |");
-        System.out.println("+---------------------------------+");
+        System.out.println("\n");
+        System.out.println("*================================*");
+        System.out.println("|    Selamat Datang di GoFood!   |");
+        System.out.println("*================================*");
 
-        registrasiPengguna(); // Lakukan registrasi di awal
+        registrasiPengguna();
 
-        int pilihan;
+        int pilihan = -1;
         do {
             tampilkanMenuUtama();
-            pilihan = getInputInteger("Pilihan Anda: ");
-
             try {
+                System.out.print("Pilihan: ");
+                pilihan = scan.nextInt();
+                scan.nextLine();
+
                 prosesPilihanMenuUtama(pilihan);
+            } catch (InputMismatchException e) {
+                System.err.println("\n(!) Error: Input tidak valid. Harap masukkan angka.");
+                scan.nextLine();
+                pilihan = -1;
             } catch (HandlerInputTidakValid e) {
                 System.err.println("\n(!) Error: " + e.getMessage() + " Silakan coba lagi.");
-            } catch (Exception e) { // Menangkap error tak terduga lain
-                System.err.println("\n(!) Terjadi kesalahan tak terduga: " + e.getMessage());
-                // e.printStackTrace(); // Uncomment untuk debug jika perlu
             }
 
-            // Beri jeda sebelum kembali ke menu, kecuali saat keluar
-            if (pilihan != 5) {
+            if (pilihan != 5 && pilihan >= 1 && pilihan <= 4) {
                 System.out.println("\nTekan Enter untuk kembali ke menu utama...");
-                scan.nextLine(); // Menunggu user menekan Enter
             }
 
-        } while (pilihan != 5); // 5 adalah pilihan Keluar
+        } while (pilihan != 5);
 
         System.out.println("\nTerima kasih telah menggunakan GoFood!");
-        scan.close(); // Tutup Scanner saat aplikasi berakhir
-        // waktuAplikasi.stop(); // Opsional: stop thread waktu jika perlu
+        scan.close();
     }
 
-    private void inisialisasiDataRestoran() {
-        daftarRestoran.add(new RestoranCepatSaji("McDonald's", 2, true, "Sedang"));
-        daftarRestoran.add(new RestoranCepatSaji("Burger King", 3, false, "Sedang"));
-        daftarRestoran.add(new RestoranCepatSaji("KFC", 4, false, "Sedang"));
-        daftarRestoran.add(new RestoranCepatSaji("Gacoan", 1, true, "Murah"));
-        daftarRestoran.add(new TokoDessert("Mixue", 1, true, "Murah"));
-        daftarRestoran.add(new TokoDessert("Retawu Deli", 5, false, "Mahal"));
-        daftarRestoran.add(new TokoDessert("Beli Kopi", 2, false, "Sedang"));
-    }
-
-    private void registrasiPengguna() {
+    public static void registrasiPengguna() {
         System.out.println("\n--- Registrasi Akun Baru ---");
         String user, no, alamat;
         do {
@@ -95,22 +91,16 @@ public class GoFoodApp {
                 System.out.println("(!) Alamat tidak boleh kosong.");
             }
         } while (alamat.isEmpty());
-
-        this.pengguna = new Pengguna(user, no, alamat); // Buat objek Pengguna
-        System.out.println("Registrasi berhasil! Selamat datang, " + this.pengguna.getUsername() + "!");
-        // Beri saldo awal untuk memudahkan testing
-        this.pengguna.tambahSaldo(50000);
+        pengguna = new Pengguna(user, no, alamat);
+        System.out.println("Registrasi berhasil! Selamat datang, " + pengguna.getUsername() + "!");
+        pengguna.tambahSaldo(50000);
         System.out.println("Anda mendapatkan saldo awal Rp 50.000!");
     }
 
-    /**
-     * Menampilkan menu utama aplikasi.
-     */
-    private void tampilkanMenuUtama() {
+    public static void tampilkanMenuUtama() {
         System.out.println("\n=========================");
         System.out.println("    GoFood - Menu Utama");
         System.out.println("=========================");
-        // Tampilkan informasi penting: waktu, user, saldo
         System.out.println("Waktu Saat Ini: " + waktuAplikasi);
         System.out.println("Halo, " + pengguna.getUsername() + "!");
         System.out.printf("Saldo Anda    : Rp %,.0f\n", pengguna.getSaldo());
@@ -123,7 +113,7 @@ public class GoFoodApp {
         System.out.println("=========================");
     }
 
-    private void prosesPilihanMenuUtama(int pilihan) throws HandlerInputTidakValid {
+    public static void prosesPilihanMenuUtama(int pilihan) throws HandlerInputTidakValid {
         switch (pilihan) {
             case 1:
                 lihatProfil();
@@ -138,31 +128,22 @@ public class GoFoodApp {
                 tampilkanRiwayatPesanan();
                 break;
             case 5:
-                break; // Keluar (ditangani di loop run())
-            default:
-                throw new HandlerInputTidakValid("Pilihan menu tidak valid.");
+                break;
         }
     }
 
-    // --- Fitur Pengguna ---
-    /**
-     * Menampilkan profil pengguna dan opsi update.
-     */
-    private void lihatProfil() {
-        this.pengguna.tampilkanDetail();
+    public static void lihatProfil() {
+        pengguna.tampilkanDetail();
         System.out.print("Ingin memperbarui profil? (ya/tidak): ");
-        String jawaban = scan.nextLine().trim();
+        String jawaban = scan.nextLine();
         if (jawaban.equalsIgnoreCase("ya")) {
-            this.pengguna.updateProfil(scan);
+            pengguna.perbaruiProfil(scan);
         } else if (!jawaban.equalsIgnoreCase("tidak")) {
             System.out.println("Pilihan tidak valid, kembali ke menu.");
         }
     }
 
-    /**
-     * Menjalankan proses top up saldo pengguna.
-     */
-    private void prosesTopUpSaldo() throws HandlerInputTidakValid {
+    public static void prosesTopUpSaldo() throws HandlerInputTidakValid {
         System.out.println("\n--- Top Up Saldo ---");
         System.out.println("Pilih nominal top up:");
         System.out.println("1. Rp 10.000");
@@ -172,10 +153,18 @@ public class GoFoodApp {
         System.out.println("0. Batal");
         System.out.println("--------------------");
 
-        int pilihan = getInputInteger("Pilihan nominal: ");
-        double jumlahTopUp = 0;
+        int pilihanTopUp;
+        System.out.print("Pilihan nominal: ");
+        try {
+            pilihanTopUp = scan.nextInt();
+            scan.nextLine();
+        } catch (InputMismatchException e) {
+            scan.nextLine();
+            throw new HandlerInputTidakValid("Input pilihan nominal tidak valid (harus angka).");
+        }
 
-        switch (pilihan) {
+        double jumlahTopUp = 0;
+        switch (pilihanTopUp) {
             case 1:
                 jumlahTopUp = 10000;
                 break;
@@ -190,35 +179,68 @@ public class GoFoodApp {
                 break;
             case 0:
                 System.out.println("Top up dibatalkan.");
-                return; // Kembali
+                return;
             default:
                 throw new HandlerInputTidakValid("Pilihan nominal tidak valid.");
         }
-        this.pengguna.tambahSaldo(jumlahTopUp); // Panggil method tambah saldo
+        pengguna.tambahSaldo(jumlahTopUp);
     }
 
-    // --- Fitur Pemesanan ---
-    /**
-     * Mengelola alur pembuatan pesanan baru.
-     */
-    private void buatPesanan() throws HandlerInputTidakValid {
-        // 1. Pilih Restoran
-        Restoran restoranPilihan = pilihRestoran();
-        if (restoranPilihan == null) {
-            return; // User batal memilih
+    public static void buatPesanan() throws HandlerInputTidakValid {
+        System.out.println("\n--- Pilih Restoran ---");
+        if (daftarRestoran == null || daftarRestoran.length == 0) {
+            System.out.println("(!) Maaf, belum ada restoran yang terdaftar.");
+            return;
         }
-        // 2. Buat objek Pesanan baru
-        Pesanan pesananBaru = new Pesanan(this.pengguna, restoranPilihan);
+        List<Restoran> restoUrut = new ArrayList<>();
+        for (Restoran r : daftarRestoran) {
+            if (r.isAdaPromo()) {
+                restoUrut.add(r);
+            }
+        }
+        for (Restoran r : daftarRestoran) {
+            if (!r.isAdaPromo()) {
+                restoUrut.add(r);
+            }
+        }
 
-        // 3. Pilih Menu (bisa multiple)
+        System.out.println("Daftar Restoran (Promo didahulukan):");
+        for (int i = 0; i < restoUrut.size(); i++) {
+            restoUrut.get(i).tampilkanDetail(i + 1);
+        }
+        System.out.println("0. Kembali ke Menu Utama");
+        System.out.println("----------------------");
+
+        int pilihanResto;
+        Restoran restoranPilihan = null;
+
+        System.out.print("Pilih nomor restoran: ");
+        try {
+            pilihanResto = scan.nextInt();
+            scan.nextLine();
+        } catch (InputMismatchException e) {
+            scan.nextLine();
+            throw new HandlerInputTidakValid("Input pilihan restoran tidak valid (harus angka).");
+        }
+
+        if (pilihanResto == 0) {
+            System.out.println("Pemilihan restoran dibatalkan.");
+            return;
+        }
+        if (pilihanResto > 0 && pilihanResto <= restoUrut.size()) {
+            restoranPilihan = restoUrut.get(pilihanResto - 1);
+        } else {
+            throw new HandlerInputTidakValid("Pilihan restoran tidak valid.");
+        }
+
+        Pesanan pesananBaru = new Pesanan(pengguna, restoranPilihan);
         pilihMenuUntukPesanan(pesananBaru);
-        // Cek apakah ada item valid yang ditambahkan
-        if (pesananBaru.getTotalAkhir() <= 0 && pesananBaru.getBiayaPengantaran() == 0) {
-            System.out.println("Keranjang masih kosong, pesanan dibatalkan.");
+
+        if (pesananBaru.getTotalAkhir() == 0) {
+            System.out.println("Keranjang kosong, pesanan dibatalkan.");
             return;
         }
 
-        // 4. Pilih Jenis Pengantaran
         JenisPengantaran pengantaranPilihan = pilihPengantaran(restoranPilihan.getJarak());
         if (pengantaranPilihan == null) {
             System.out.println("Pengantaran tidak dipilih, pesanan dibatalkan.");
@@ -226,261 +248,161 @@ public class GoFoodApp {
         }
         pesananBaru.setJenisPengantaran(pengantaranPilihan);
 
-        // Hitung ongkir berdasarkan pilihan
         double ongkir = Pengantaran.hitungOngkir(pengantaranPilihan, restoranPilihan.getJarak(), waktuAplikasi.getJam());
-        if (ongkir < 0) { // Jika ongkir -1 (tidak tersedia)
-            System.out.println("(!) Opsi pengantaran '" + pengantaranPilihan.getNama() + "' tidak tersedia pada jam ini. Pesanan dibatalkan.");
+        if (ongkir < 0) {
+            System.out.println("(!) Opsi pengantaran tdk tersedia. Pesanan dibatalkan.");
             return;
         }
         pesananBaru.setBiayaPengantaran(ongkir);
-        pesananBaru.hitungTotalAkhir(); // Hitung ulang total setelah ongkir
-
-        // 5. Konfirmasi dan Proses Pembayaran (Saldo)
+        pesananBaru.hitungTotalAkhir();
         konfirmasiDanBayarPesanan(pesananBaru);
     }
 
-    /**
-     * Menampilkan daftar restoran dan meminta pilihan user.
-     */
-    private Restoran pilihRestoran() throws HandlerInputTidakValid {
-        System.out.println("\n--- Pilih Restoran ---");
-        // Sorting sederhana: dahulukan yang promo
-        List<Restoran> restoPromo = new ArrayList<>();
-        List<Restoran> restoBiasa = new ArrayList<>();
-        for (Restoran r : this.daftarRestoran) {
-            if (r.isAdaPromo()) {
-                restoPromo.add(r);
-            } else {
-                restoBiasa.add(r);
-            }
-        }
-        List<Restoran> restoUrut = new ArrayList<>(restoPromo); // Mulai dengan yg promo
-        restoUrut.addAll(restoBiasa); // Tambahkan sisanya
-
-        if (restoUrut.isEmpty()) {
-            System.out.println("(!) Maaf, belum ada restoran yang terdaftar.");
-            return null;
-        }
-
-        System.out.println("Daftar Restoran (Promo didahulukan):");
-        for (int i = 0; i < restoUrut.size(); i++) {
-            restoUrut.get(i).tampilkanDetail(i + 1); // Method ini sudah menampilkan kategori harga
-        }
-        System.out.println("0. Kembali ke Menu Utama");
-        System.out.println("----------------------");
-
-        int pilihan = getInputInteger("Pilih nomor restoran: ");
-        if (pilihan == 0) {
-            System.out.println("Pemilihan restoran dibatalkan.");
-            return null;
-        }
-        // Validasi pilihan
-        if (pilihan > 0 && pilihan <= restoUrut.size()) {
-            return restoUrut.get(pilihan - 1); // Kembalikan restoran yang dipilih
-        } else {
-            throw new HandlerInputTidakValid("Pilihan restoran tidak valid.");
-        }
-    }
-
-    /**
-     * Memproses pemilihan menu untuk pesanan yang sedang dibuat.
-     */
-    private void pilihMenuUntukPesanan(Pesanan pesanan) throws HandlerInputTidakValid {
+    public static void pilihMenuUntukPesanan(Pesanan pesanan) throws HandlerInputTidakValid {
         Restoran restoran = pesanan.getRestoran();
-        // Ambil daftar menu sebagai List of Map Entry untuk memudahkan pemilihan by index
         List<Map.Entry<String, Double>> menuList = new ArrayList<>(restoran.getDaftarMenuMap().entrySet());
+        int pilihanMenu = -1;
+        int jumlah;
 
-        int pilihanMenu;
+        System.out.println("\n--- Pilih Menu dari " + restoran.getNama() + " ---");
         do {
-            restoran.tampilkanSemuaMenu(); // Tampilkan menu restoran saat ini
+            restoran.tampilkanSemuaMenu();
             System.out.println("0. Selesai memilih menu & lanjut ke pengantaran");
             System.out.println("-------------------------------------------------");
 
-            pilihanMenu = getInputInteger("Pilih nomor menu (0 untuk selesai): ");
+            System.out.print("Pilih nomor menu (0 untuk selesai): ");
+            try {
+                pilihanMenu = scan.nextInt();
+                scan.nextLine();
+            } catch (InputMismatchException e) {
+                scan.nextLine();
+                System.err.println("(!) Pilihan menu tidak valid (harus angka). Coba lagi.");
+                continue;
+            }
 
             if (pilihanMenu > 0 && pilihanMenu <= menuList.size()) {
-                // Ambil detail menu yang dipilih
                 Map.Entry<String, Double> menuEntry = menuList.get(pilihanMenu - 1);
                 String namaMenuPilihan = menuEntry.getKey();
                 double hargaMenuPilihan = menuEntry.getValue();
 
-                int jumlah = getInputInteger("Masukkan jumlah '" + namaMenuPilihan + "': ");
+                System.out.print("Masukkan jumlah '" + namaMenuPilihan + "': ");
+                try {
+                    jumlah = scan.nextInt();
+                    scan.nextLine();
+                } catch (InputMismatchException e) {
+                    scan.nextLine();
+                    System.err.println("(!) Jumlah tidak valid (harus angka). Item tidak ditambahkan.");
+                    continue;
+                }
+
                 if (jumlah > 0) {
-                    // Tambahkan item ke objek pesanan
                     pesanan.tambahItem(namaMenuPilihan, hargaMenuPilihan, jumlah);
-                    pesanan.tampilkanDetail(); // Tampilkan draft keranjang sementara
+                    pesanan.tampilkanDetail();
                 } else {
-                    System.out.println("(!) Jumlah harus lebih dari 0.");
+                    System.out.println("(!) Jumlah harus > 0.");
                 }
             } else if (pilihanMenu != 0) {
-                // Jangan lempar exception, biarkan user coba lagi
-                System.err.println("(!) Pilihan menu tidak valid.");
+                System.err.println("(!) Pilihan menu tidak ada di daftar.");
             }
-        } while (pilihanMenu != 0); // Loop sampai user memilih 0
+        } while (pilihanMenu != 0);
     }
 
-    /**
-     * Menampilkan opsi pengantaran dan meminta pilihan user.
-     */
-    private JenisPengantaran pilihPengantaran(int jarak) throws HandlerInputTidakValid {
-        // Dapatkan opsi yang mungkin tersedia berdasarkan jam
+    public static JenisPengantaran pilihPengantaran(int jarak) throws HandlerInputTidakValid {
         List<JenisPengantaran> opsiTersedia = Pengantaran.getPilihanTersedia(waktuAplikasi.getJam());
-        List<JenisPengantaran> opsiValidDitampilkan = new ArrayList<>(); // Simpan yang benar2 bisa dipilih
+        List<JenisPengantaran> opsiValidDitampilkan = new ArrayList<>();
 
-        if (opsiTersedia.isEmpty()) {
-            System.out.println("(!) Maaf, tidak ada opsi pengantaran yang tersedia saat ini.");
-            return null;
-        }
-
-        // Tampilkan opsi beserta ongkirnya (jika valid)
         System.out.println("\n== Pilih Jenis Pengantaran ==");
         int nomorOpsi = 1;
         for (JenisPengantaran jenis : opsiTersedia) {
             double ongkir = Pengantaran.hitungOngkir(jenis, jarak, waktuAplikasi.getJam());
-            if (ongkir >= 0) { // Hanya tampilkan jika ongkir valid (>= 0)
+            if (ongkir >= 0) {
                 System.out.printf("%d. %s - Rp %,.0f\n", nomorOpsi++, jenis.getNama(), ongkir);
-                opsiValidDitampilkan.add(jenis); // Tambahkan ke list yang bisa dipilih
+                opsiValidDitampilkan.add(jenis);
             }
         }
         System.out.println("0. Batal Pesanan");
         System.out.println("==============================");
 
-        // Cek apakah ada opsi valid yang bisa ditampilkan
-        if (opsiValidDitampilkan.isEmpty()) {
-            System.out.println("(!) Tidak ada opsi pengantaran yang valid pada jam ini. Pesanan dibatalkan.");
-            return null;
+        int pilihanAntar;
+        System.out.print("Pilih nomor pengantaran: ");
+        try {
+            pilihanAntar = scan.nextInt();
+            scan.nextLine();
+        } catch (InputMismatchException e) {
+            scan.nextLine();
+            throw new HandlerInputTidakValid("Input pilihan pengantaran tidak valid (harus angka).");
         }
 
-        int pilihan = getInputInteger("Pilih nomor pengantaran: ");
-        if (pilihan == 0) {
+        if (pilihanAntar == 0) {
             System.out.println("Pemilihan pengantaran dibatalkan.");
             return null;
         }
-        // Validasi pilihan berdasarkan list yang ditampilkan
-        if (pilihan > 0 && pilihan <= opsiValidDitampilkan.size()) {
-            return opsiValidDitampilkan.get(pilihan - 1); // Kembalikan pilihan yang valid
+        if (pilihanAntar > 0 && pilihanAntar <= opsiValidDitampilkan.size()) {
+            return opsiValidDitampilkan.get(pilihanAntar - 1);
         } else {
             throw new HandlerInputTidakValid("Pilihan pengantaran tidak valid.");
         }
     }
 
-    /**
-     * Menampilkan draft akhir, cek saldo, konfirmasi, dan proses pembayaran.
-     */
-    private void konfirmasiDanBayarPesanan(Pesanan pesanan) throws HandlerInputTidakValid {
+    public static void konfirmasiDanBayarPesanan(Pesanan pesanan) {
         System.out.println("\n=== Konfirmasi Pesanan ===");
-        pesanan.tampilkanDetail(); // Tampilkan detail final sebelum bayar
+        pesanan.tampilkanDetail();
         System.out.printf("Saldo Anda saat ini : Rp %,.0f\n", pengguna.getSaldo());
         System.out.println("==========================");
-
-        // 1. Cek Saldo
         if (!pesanan.isSaldoCukup()) {
-            System.out.printf("(!) Maaf, saldo Anda (Rp %,.0f) tidak cukup untuk membayar pesanan ini (Rp %,.0f).\n",
-                    pengguna.getSaldo(), pesanan.getTotalAkhir());
-            System.out.println("Silakan top up saldo terlebih dahulu.");
+            System.out.printf("(!) Saldo Anda (Rp %,.0f) tdk cukup utk bayar Rp %,.0f.\n", pengguna.getSaldo(), pesanan.getTotalAkhir());
             System.out.println("Pesanan dibatalkan.");
-            return; // Batalkan proses
+            return;
         }
-
-        // 2. Minta Konfirmasi
         System.out.print("Konfirmasi pesanan dan bayar? (ya/tidak): ");
         String konfirmasi = scan.nextLine().trim();
-
         if (konfirmasi.equalsIgnoreCase("ya")) {
-            // 3. Proses Pembayaran (Kurangi Saldo)
-            if (this.pengguna.kurangiSaldo(pesanan.getTotalAkhir())) {
+            if (pengguna.kurangiSaldo(pesanan.getTotalAkhir())) {
                 System.out.println("\n(+) Pembayaran berhasil!");
                 System.out.printf("Saldo Anda sekarang: Rp %,.0f\n", pengguna.getSaldo());
-                System.out.println("Pesanan #" + pesanan.getIdPesanan() + " berhasil dibuat.");
-                System.out.println("Mohon ditunggu, pesanan Anda akan segera tiba! (simulasi langsung sampai)");
-                // 4. Tambahkan ke Riwayat
-                this.riwayatPesanan.add(pesanan);
+                System.out.println("Pesanan #" + pesanan.getIdPesanan() + " berhasil dibuat & akan segera tiba!");
+                riwayatPesanan.add(pesanan);
             } else {
-                // Seharusnya tidak terjadi karena sudah dicek saldo, tapi jaga-jaga
-                System.err.println("(!) Error: Gagal memproses pembayaran meskipun saldo tampak cukup.");
+                System.err.println("(!) Error: Gagal memproses pembayaran.");
                 System.out.println("Pesanan dibatalkan.");
             }
         } else {
             System.out.println("Pesanan dibatalkan.");
-            // Tidak ditambahkan ke riwayat jika dibatalkan
         }
     }
 
-    // --- Fitur Riwayat ---
-    /**
-     * Menampilkan daftar riwayat pesanan yang telah selesai.
-     */
-    private void tampilkanRiwayatPesanan() {
+    public static void tampilkanRiwayatPesanan() {
         System.out.println("\n--- Riwayat Pesanan Selesai ---");
-
-        if (this.riwayatPesanan.isEmpty()) {
-            System.out.println("(Belum ada riwayat pesanan)");
-        } else {
-            // Urutkan riwayat berdasarkan ID terbaru di atas (descending)
-            this.riwayatPesanan.sort(Comparator.comparingInt(Pesanan::getIdPesanan).reversed());
-            // Tampilkan ringkasan
-            for (Pesanan p : this.riwayatPesanan) {
-                p.tampilkanRingkasanRiwayat();
-            }
-
-            // Opsi untuk melihat detail
-            System.out.print("\nMasukkan ID Pesanan untuk lihat detail (0 untuk kembali): #");
-            int id = getInputInteger(""); // Minta ID
-            if (id > 0) {
-                boolean found = false;
-                for (Pesanan p : this.riwayatPesanan) { // Cari pesanan by ID
-                    if (p.getIdPesanan() == id) {
-                        p.tampilkanDetail(); // Tampilkan detail lengkap jika ketemu
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) { // Jika ID tidak ditemukan
-                    System.out.println("(!) Pesanan dengan ID #" + id + " tidak ditemukan dalam riwayat.");
-                }
-            } else if (id != 0) {
-                // Jika input bukan 0 tapi tidak valid (misal negatif dari getInt)
-                System.out.println("Input ID tidak valid.");
-            }
+        riwayatPesanan.sort(Comparator.comparingInt(Pesanan::getIdPesanan).reversed());
+        for (Pesanan p : riwayatPesanan) {
+            p.tampilkanRingkasanRiwayat();
         }
+        System.out.print("\nMasukkan ID Pesanan untuk lihat detail (0 untuk kembali): #");
+        int id;
+        try {
+            id = scan.nextInt();
+            scan.nextLine();
+        } catch (InputMismatchException e) {
+            scan.nextLine();
+            System.out.println("Input ID tidak valid (harus angka).");
+            id = -1;
+        }
+
+        if (id > 0) {
+            boolean found = false;
+            for (Pesanan p : riwayatPesanan) {
+                if (p.getIdPesanan() == id) {
+                    p.tampilkanDetail();
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                System.out.println("(!) Pesanan ID #" + id + " tidak ditemukan.");
+            }
+        } else if (id != 0) {
+        }
+
         System.out.println("-----------------------------");
     }
-
-    // --- Metode Helper ---
-    /**
-     * Helper untuk membaca input integer dari pengguna dengan aman. Terus
-     * meminta input hingga integer valid dimasukkan.
-     *
-     * @param prompt Pesan yang ditampilkan ke pengguna sebelum input.
-     * @return Integer yang valid dari pengguna.
-     */
-    private int getInputInteger(String prompt) {
-        int input = -1; // Nilai default jika terjadi error tak terduga
-        while (true) {
-            System.out.print(prompt);
-            try {
-                String line = scan.nextLine().trim(); // Baca seluruh baris
-                // Cek jika input kosong padahal ada prompt
-                if (line.isEmpty() && !prompt.isEmpty()) {
-                    System.err.println("(!) Input tidak boleh kosong.");
-                    continue; // Minta input lagi
-                } else if (line.isEmpty() && prompt.isEmpty()) {
-                    // Jika prompt kosong (misal setelah pesan error) dan user enter,
-                    // mungkin lebih baik loop lagi atau return nilai khusus
-                    continue; // Minta input lagi saja
-                }
-                input = Integer.parseInt(line); // Coba ubah ke integer
-                break; // Keluar loop jika berhasil
-            } catch (NumberFormatException e) {
-                System.err.println("(!) Input tidak valid. Harap masukkan angka.");
-                // Loop akan berlanjut
-            } catch (NoSuchElementException e) {
-                // Error jika input stream ditutup (jarang terjadi di console biasa)
-                System.err.println("(!) Input stream error. Aplikasi akan keluar.");
-                System.exit(1); // Keluar paksa
-            }
-        }
-        return input;
-    }
-
 }

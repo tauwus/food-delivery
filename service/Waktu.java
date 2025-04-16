@@ -7,7 +7,6 @@ public class Waktu {
 
     private volatile int jam;
     private volatile int menit;
-    private volatile boolean running = true;
     private Thread clockThread;
 
     public Waktu() {
@@ -27,29 +26,28 @@ public class Waktu {
 
     private void startClock() {
         clockThread = new Thread(() -> {
-            while (running) {
+            while (true) {
                 try {
                     Thread.sleep(1000);
 
-                    int currentMinute = this.menit;
-                    int currentHour = this.jam;
+                    int hitungMenit = this.menit;
+                    int hitungJam = this.jam;
 
-                    currentMinute += 5;
+                    hitungMenit += 5;
 
-                    if (currentMinute >= 60) {
-                        currentHour += currentMinute / 60;
-                        currentMinute %= 60;
+                    if (hitungMenit >= 60) {
+                        hitungJam += hitungMenit / 60;
+                        hitungMenit %= 60;
                     }
-                    if (currentHour >= 24) {
-                        currentHour %= 24;
+                    if (hitungJam >= 24) {
+                        hitungJam %= 24;
                     }
 
-                    this.menit = currentMinute;
-                    this.jam = currentHour;
+                    this.menit = hitungMenit;
+                    this.jam = hitungJam;
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    running = false;
                 }
             }
         });

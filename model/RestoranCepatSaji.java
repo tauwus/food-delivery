@@ -2,12 +2,12 @@ package model;
 
 public class RestoranCepatSaji extends Restoran {
 
-    public RestoranCepatSaji(String nama, int jarak, boolean adaPromo, String kategoriHarga) {
-        super(nama, jarak, adaPromo, kategoriHarga);
-        inisialisasiMenuDefault(nama);
+    public RestoranCepatSaji(String nama) {
+        super(nama);
+        daftarMenu(nama);
     }
 
-    private void inisialisasiMenuDefault(String namaResto) {
+    private void daftarMenu(String namaResto) {
         if (namaResto.equalsIgnoreCase("McDonald's")) {
             tambahMenu("Hot Cakes 3pcs", 33000);
             tambahMenu("Chicken McMuffin", 29000);
@@ -27,8 +27,8 @@ public class RestoranCepatSaji extends Restoran {
             tambahMenu("Float Yuzu", 10000);
             tambahMenu("Chicken Strip", 18000);
         } else if (namaResto.equalsIgnoreCase("Gacoan")) {
-            tambahMenu("Mie Gacoan Lv.1", 10000);
-            tambahMenu("Mie Hompimpa Lv.1", 10000);
+            tambahMenu("Mie Gacoan", 10000);
+            tambahMenu("Mie Hompimpa", 10000);
             tambahMenu("Udang Keju", 9000);
             tambahMenu("Lumpia Udang", 9000);
             tambahMenu("Es Gobak Sodor", 8500);
