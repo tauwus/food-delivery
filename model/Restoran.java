@@ -11,6 +11,9 @@ public abstract class Restoran implements Showable {
     protected Map<String, Double> daftarMenu;
     protected boolean adaPromo;
     protected String kategoriHarga;
+    private String promoDeskripsi;
+    public String getPromoDeskripsi() { return promoDeskripsi; }
+    public void setPromoDeskripsi(String promo) { this.promoDeskripsi = promo; }
 
     public Restoran(String nama, int jarak, boolean adaPromo, String kategoriHarga) {
         this.nama = nama;
@@ -49,6 +52,15 @@ public abstract class Restoran implements Showable {
     public Double getHargaMenu(String namaMenu) {
         return this.daftarMenu.get(namaMenu);
     }
+
+    public double getRataRataHargaMenu() {
+        if (daftarMenu == null || daftarMenu.isEmpty()) return 0;
+        double total = 0;
+        for (double harga : daftarMenu.values()) {
+            total += harga;
+        }
+        return total / daftarMenu.size();
+    }    
 
     public void tampilkanSemuaMenu() {
         System.out.println("\n--- Menu " + this.nama + " ---");
