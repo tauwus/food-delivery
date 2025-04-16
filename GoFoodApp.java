@@ -1,15 +1,14 @@
 
-import exceptions.HandlerInputTidakValid;
 import enums.JenisPengantaran;
-import model.*;
-import service.*;
-
-import java.util.Scanner;
-import java.util.List;
+import exceptions.HandlerInputTidakValid;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import model.*;
+import service.*;
 
 public class GoFoodApp {
 
@@ -70,20 +69,30 @@ public class GoFoodApp {
     public static void registrasiPengguna() {
         System.out.println("\n--- Registrasi Akun Baru ---");
         String user, no, alamat;
+        
         do {
             System.out.print("Masukkan username: ");
             user = scan.nextLine().trim();
+            
             if (user.isEmpty()) {
                 System.out.println("(!) Username tidak boleh kosong.");
+            } else if (user.length() > 20) {
+                System.out.println("(!) Username terlalu panjang. Maksimal 20 karakter.");
             }
-        } while (user.isEmpty());
+        } while (user.isEmpty() || user.length() > 20);
+        
         do {
             System.out.print("Masukkan nomor handphone: ");
             no = scan.nextLine().trim();
+            
             if (no.isEmpty() || !no.matches("\\d+")) {
                 System.out.println("(!) Nomor HP tidak valid (hanya angka).");
+            } else if (!no.startsWith("08")) {
+                System.out.println("(!) Nomor HP harus diawali dengan '08'.");
+            } else if (no.length() < 10 || no.length() > 14) {
+                System.out.println("(!) Nomor HP harus terdiri dari 10 hingga 14 digit.");
             }
-        } while (no.isEmpty() || !no.matches("\\d+"));
+        } while (no.isEmpty() || !no.matches("\\d+") || !no.startsWith("08") || no.length() < 10 || no.length() > 14);
         do {
             System.out.print("Masukkan alamat: ");
             alamat = scan.nextLine().trim();
@@ -91,11 +100,13 @@ public class GoFoodApp {
                 System.out.println("(!) Alamat tidak boleh kosong.");
             }
         } while (alamat.isEmpty());
+        
         pengguna = new Pengguna(user, no, alamat);
         System.out.println("Registrasi berhasil! Selamat datang, " + pengguna.getUsername() + "!");
         pengguna.tambahSaldo(50000);
         System.out.println("Anda mendapatkan saldo awal Rp 50.000!");
     }
+    
 
     public static void tampilkanMenuUtama() {
         System.out.println("\n=========================");
@@ -186,12 +197,36 @@ public class GoFoodApp {
         pengguna.tambahSaldo(jumlahTopUp);
     }
 
+        public static void tampilkanRekomendasiMenuHariIni() {
+        System.out.println("\n=== Rekomendasi Menu Hari Ini ===");
+    
+        List<Restoran> restoList = new ArrayList<>(List.of(daftarRestoran));
+        restoList.sort(Comparator.comparingDouble(Restoran::getRataRataHargaMenu));
+    
+        int jumlahRekomendasi = Math.min(3, restoList.size());
+        for (int i = 0; i < jumlahRekomendasi; i++) {
+            Restoran r = restoList.get(i);
+            System.out.printf("%d. %s - Rata-rata Harga: Rp %,.0f\n", i + 1, r.getNama(), r.getRataRataHargaMenu());
+    
+            int count = 0;
+            for (Map.Entry<String, Double> entry : r.getDaftarMenuMap().entrySet()) {
+                if (count++ >= 2) break;
+                System.out.printf("   - %s (Rp %,.0f)\n", entry.getKey(), entry.getValue());
+            }
+        }
+    
+        System.out.println("=================================");
+    }
+
     public static void buatPesanan() throws HandlerInputTidakValid {
+        tampilkanRekomendasiMenuHariIni();
+        
         System.out.println("\n--- Pilih Restoran ---");
         if (daftarRestoran == null || daftarRestoran.length == 0) {
             System.out.println("(!) Maaf, belum ada restoran yang terdaftar.");
             return;
         }
+
         List<Restoran> restoUrut = new ArrayList<>();
         for (Restoran r : daftarRestoran) {
             if (r.isAdaPromo()) {
